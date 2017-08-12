@@ -1,13 +1,23 @@
-# jenkins-to-salesforce
+# jenkins-container-for-salesforce-builds
 
-Simple jenkins image with Force.com Migrations tool.
+Jenkins image with Force.com Migrations tool.
 
 ## Features
 Tools needed to make deployments to salesforce.com included in this image:
-* Force.com Migrations Tool ([official resources]( https://developer.salesforce.com/page/Force.com_Migration_Tool ))
-* https://ant.apache.org/bindownload.cgi
 
-## Plugins
+* [Jenkins](https://repo.jenkins-ci.org/public/org/jenkins-ci/main/jenkins-war/)
+* [Force.com Migrations Tool]( https://developer.salesforce.com/page/Force.com_Migration_Tool )
+* [Ant](https://ant.apache.org/bindownload.cgi)
+* [Maven 3](https://apache.osuosl.org/maven/maven-3/)
+* [Open JDK8](http://www.oracle.com/technetwork/java/javase/downloads/index.html)
+
+The image is created on top of Alpine and requires about ~400Mb
+
+Other goodies included: `git, openssh-client, curl, unzip, tar`
+
+## Jenkins Plugins
+
+Jenkins needs plugins to be properly work. I've included the ones that I need under `plugins.txt` file, but your needs may be different.
 
 If you want to create your own plugins file, you can export a list of plugins from an existing server by running this command:
 
@@ -18,43 +28,61 @@ curl -sSL "http://jenkins:jenkins@localhost:8080/pluginManager/api/xml?depth=1&x
 Then replace the plugins.txt accordingly.
 
 
-## Usage
+## Getting Started
 
-How to Use Dockerfiles
+You will need to have [**docker**](https://www.docker.com/) installed in your machine and clone/download this repo.
 
-Using the Dockerfiles is as simple as having the docker daemon run one. The output after executing the script will be the ID of the new docker image.
+Using the Dockerfile is as simple as having the docker daemon run one. The output after executing the script will be the ID of the new docker image.
 
 Usage:
 
-# Build an image using the Dockerfile at current location
-# Example: sudo docker build -t [name] .
-sudo docker build -t sf_jenkins .    
+The first time, you will need to build a base image using the Dockerfile at current location
 
-This is the basic command to start jenkins:
+#### Example: sudo docker build -t [image_name] .
+
+```sh
+$ sudo docker build -t sf_jenkins .  
+```
+
+After the image is ready (it should take a few minutes), you are ready to spawn containers based on that image:
+
+#### Example: docker run -p [port1]:[port2] [image_name]
+
+This is the basic command to start sf_jenkins:
+
 ```sh
 $ docker run -p 8080:8080 sf_jenkins
 ```
-This will store all jenkins data and configuration in /var/jenkins_home. You can make that a persistent volume:
+
+#### Example: docker run --name [container_name] -p [port1]:[port2] -v [volume1]:[volume2] [image_name]
+
+This will create a container sf_jenkins_container and store all jenkins data and configuration from ~/Project/jenkinsProjects in your host PC and /var/jenkins_home in the container:
 
 ```sh
-$ docker run --name docker_containername -p 8080:8080 -v /var/jenkins_home sf_jenkins
+$ docker run --name sf_jenkins_container -p 8080:8080 -p 50000:50000 -v ~/Project/jenkinsProjects:/var/jenkins_home -d sf_jenkins
 ```
 
-You can bind volume from host and container:
-The jenkins user in container (jenkins user - uid 102, same as base jenkins image) must have access to /usr/back/jenkins:
+#### First time Jenkins user:
 
-```sh
-$ docker run -p 8080:8080 -v /usr/back/jenkins:/var/jenkins_home sf_jenkins
-```
+After the container is done, open a browser in your PC and point it to `http:\\localhost:8080` to finish setting it up (hint:  /var/jenkins_home/secrets/initialAdminPassword in the container maps to ~/Project/jenkinsProjects/secrets/initialAdminPassword in your PC)
 
-You can do it all in one command too :
-```sh
-$ docker run --name jenkins-sfdc -p 8080:8080 -p 50000:50000 -v /usr/back/jenkins:/var/jenkins_home -d sf_jenkins
-```
+On the next screen, if you don't want to install additional plugins, click on the "x" (the plugins were installed by the Dockerfile using `plugins.txt` file)
 
 Please refer to jenkins official usage for a more complete explanation on the rest of jenkins matter: https://hub.docker.com/_/jenkins/
 
+### The force's dataloader:
+
+This is not officially supported (and hopefully will be replaced by salesforce DX in the future). You can download and compile the dataloader in the container:
+
+1. Open a shell for the container (e.g. `docker exec -it <container_id> bash`)
+1. Clone the [dataloader repo](https://github.com/forcedotcom/dataloader)
+1. cd into the created folder and run `mvn clean package -DskipTests`
+1. The dataloader.jar will be compiled and generated inside the "target" folder
+1. Move the jar to the /var/jenkins_home folder for easy access
+1. That's it. You can now use jenkins and java to call dataloader-40.0-uber.jar as part as your salesforce deployment process.
+
 ### Public key authentication with git
+
 If you have a jenkins job setup with git plugin, the best way to authenticate against the server where the target repository lives is with a public key. Jenkins runs as jenkins user within the container, therefore you'll need jenkin's user public key.
 
 Get inside the running container (we are assuming the containers name is jenkins-sfdc):
@@ -65,16 +93,11 @@ Then generate the rsa key pair :
 ```sh
 $ ssh-keygen -t rsa
 ```
+
 Follow the instructions, leaving everything in blank and just hitting enter key will be enough for the public and private key to get generated. Assuming you did so, the public key should be located in the following file /var/jenkins_home/.ssh/id_rsa.pub. You can use that key later to authenticate to github, bitbucket or any other servers accepting this type of authentication. For more information and additional example go to [Github wiki page](https://github.com/anyei/jenkins-to-salesforce/wiki).
 
 ### Documentation
+
 You can find more about jenkins image in the official [docker repository](https://hub.docker.com/_/jenkins/).
 
-You can find good example how to setup jenkins to deploy to saleforce in [Github wiki page](https://github.com/anyei/jenkins-to-salesforce/wiki)
-
-### Issues
-Let's keep this in [Github](https://github.com/anyei/jenkins-to-salesforce/issues).
-
-### Contributing
-
-You are invited to contribute, let's keep in touch in [Github](https://github.com/anyei/jenkins-to-salesforce)
+You can find good example how to setup jenkins to deploy to salesforce in [Github wiki page](https://github.com/anyei/jenkins-to-salesforce/wiki)
