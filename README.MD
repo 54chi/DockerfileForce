@@ -81,6 +81,33 @@ This is not officially supported (and hopefully will be replaced by salesforce D
 1. Move the jar to the /var/jenkins_home folder for easy access
 1. That's it. You can now use jenkins and java to call dataloader-40.0-uber.jar as part as your salesforce deployment process.
 
+#### Generating the keyfile and encrypted password
+
+From dataloader/target folder:
+
+1. Generate the key (-g option):
+
+  ```sh
+  java -cp dataloader-40.0.0-uber.jar com.salesforce.dataloader.security.EncryptionUtil -g MySecretKey
+  ```
+  Copy the generated sequence (e.g. 2faaed6d2504fc0c) and paste it into a file you create (e.g. `key.txt`)
+
+2. Generate the encrypted password (-e option):
+
+  ```sh
+  java -cp dataloader-40.0.0-uber.jar com.salesforce.dataloader.security.EncryptionUtil -e MyPassword "key.txt"
+  ```
+  Copy the generated sequence (e.g. 18623959594772bfea2e3caa8700f910) and store it somewhere safe
+  
+3. To validate the password with the key file, try this (-v option):
+
+  ```sh
+  java -cp dataloader-40.0.0-uber.jar com.salesforce.dataloader.security.EncryptionUtil -v 18623959594772bfea2e3caa8700f910 MyPassword "key.txt"
+  ```
+The encrypted password and the key files are needed to set the dataloader's config.properties file.
+
+[More Info](http://www.jitendrazaa.com/blog/salesforce/using-dataloader-and-ant-to-backup-salesforce-data-on-ftp-server-video/)
+
 ### Public key authentication with git
 
 If you have a jenkins job setup with git plugin, the best way to authenticate against the server where the target repository lives is with a public key. Jenkins runs as jenkins user within the container, therefore you'll need jenkin's user public key.
