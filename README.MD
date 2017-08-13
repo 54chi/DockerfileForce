@@ -97,7 +97,7 @@ From dataloader/target folder:
   ```sh
   java -cp dataloader-40.0.0-uber.jar com.salesforce.dataloader.security.EncryptionUtil -e MyPassword "key.txt"
   ```
-  Copy the generated sequence (e.g. 18623959594772bfea2e3caa8700f910) and store it somewhere safe
+  Copy the generated sequence (e.g. 18623959594772bfea2e3caa8700f910) and store it somewhere safe. __NOTE__: If you are using a security token, add it to your password before the encryption (e.g. MyPasswordfoLRAgiaa9wtlSOviWv83JVf)
   
 3. To validate the password with the key file, try this (-v option):
 
@@ -105,6 +105,12 @@ From dataloader/target folder:
   java -cp dataloader-40.0.0-uber.jar com.salesforce.dataloader.security.EncryptionUtil -v 18623959594772bfea2e3caa8700f910 MyPassword "key.txt"
   ```
 The encrypted password and the key files are needed to set the dataloader's config.properties file.
+
+#### Example: Execute the process "Account" from process.xml
+
+```sh
+java -cp dataloader-40.0.0-uber.jar -Dsalesforce.config.dir=/var/jenkins_home/dataloader com.salesforce.dataloader.process.ProcessRunner process.name=Account
+```
 
 [More Info](http://www.jitendrazaa.com/blog/salesforce/using-dataloader-and-ant-to-backup-salesforce-data-on-ftp-server-video/)
 
