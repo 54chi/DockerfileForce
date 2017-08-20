@@ -1,0 +1,98 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>DESCRIPTION&#xd;
+============&#xd;
+Retrieve project from specified repo (specified under Source Code Management&apos;s REPO_ORIGIN and REPO_REMOTE)&#xd;
+The repo will be cloned into your jenkins&apos; /workspace/&lt;Project name&gt; folder (e.g. /workspace/Github (Freestyle))&#xd;
+&#xd;
+Once that&apos;s done, it will COMPARE for differences between the LAST_COMMIT and CURRENT_COMMIT and copy them into the &#xd;
+/workspace/diff/&lt;CURRENT_COMMIT&gt; folder, overwriting whatever content may be there.&#xd;
+&#xd;
+* Note that if there is nothing to compare (e.g. the first time you run the project or if LAST_COMMIT is the same as CURRENT_COMMIT), the folder will be empty.&#xd;
+&#xd;
+PRE-INSTALLATION&#xd;
+================&#xd;
+Under your &quot;workspace&quot; folder, create a &quot;diffs&quot; folder. The project will use this folder to store the list of differences.&#xd;
+&#xd;
+NOTES&#xd;
+======&#xd;
+I&apos;m using git log with &quot;stat&quot;.&#xd;
+If you want to use whatchanged, here is an option:&#xd;
+`git whatchanged $LAST_COMMIT..$CURRENT_COMMIT --pretty=oneline | grep -E &apos;... A|... M&apos; | awk &apos;{print $6}&apos;` &#xd;
+&#xd;
+Other nifty tricks here:&#xd;
+`cp -av --parents` will make sure that the folder structure is preserved&#xd;
+`2&gt;/dev/null` will prevent error messages when copying (e.g &quot;cannot stat&quot;)&#xd;
+`exit 0` will always end in success, so it can continue even if the directory is empty&#xd;
+&#xd;
+&#xd;
+* Additionally, consider using something like this: https://wiki.jenkins.io/display/JENKINS/Last+Changes+Plugin</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>LAST_COMMIT</name>
+          <description>Enter the Commit ID or Tag name of the &quot;older&quot; build to compare</description>
+          <defaultValue>$GIT_PREVIOUS_COMMIT</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>CURRENT_COMMIT</name>
+          <description>Enter the Commit ID or Tag name of the &quot;newer&quot; build to compare</description>
+          <defaultValue>$GIT_COMMIT</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REPO_ORIGIN</name>
+          <description>Use this to specify a specific version/branch</description>
+          <defaultValue>refs/heads/master</defaultValue>
+        </hudson.model.StringParameterDefinition>
+        <hudson.model.StringParameterDefinition>
+          <name>REPO_REMOTE</name>
+          <description>Use this to specify a specific version/branch</description>
+          <defaultValue>refs/remotes/origin/master</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.plugins.git.GitSCM" plugin="git@3.5.1">
+    <configVersion>2</configVersion>
+    <userRemoteConfigs>
+      <hudson.plugins.git.UserRemoteConfig>
+        <refspec>$REPO_ORIGIN:$REPO_REMOTE --force</refspec>
+        <url>https://github.com/54chi/testingJenkins</url>
+      </hudson.plugins.git.UserRemoteConfig>
+    </userRemoteConfigs>
+    <branches>
+      <hudson.plugins.git.BranchSpec>
+        <name>**</name>
+      </hudson.plugins.git.BranchSpec>
+    </branches>
+    <doGenerateSubmoduleConfigurations>false</doGenerateSubmoduleConfigurations>
+    <submoduleCfg class="list"/>
+    <extensions>
+      <hudson.plugins.git.extensions.impl.CleanBeforeCheckout/>
+    </extensions>
+  </scm>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>echo &quot;BUILD ID: &quot; $BUILD_ID;
+echo &quot;PREVIOUS COMMIT:&quot; $LAST_COMMIT;
+echo &quot;GIT COMMIT: &quot; $CURRENT_COMMIT;
+rm -rf ../diffs/$CURRENT_COMMIT; mkdir ../diffs/$CURRENT_COMMIT
+</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Shell>
+      <command>cp -av --parents `git log $LAST_COMMIT..$CURRENT_COMMIT --stat | grep -E &apos;\|&apos; | awk &apos;{print $1}&apos;` ../diffs/$CURRENT_COMMIT 2&gt;/dev/null || exit 0
+</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>
