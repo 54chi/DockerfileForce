@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Bunch of goodies using the SF&apos;s dataloader jar (so you don&apos;t have to open the Dataloader CLI ever again)&#xd;
+&#xd;
+Configure credentials in /workspace&lt;Project Name&gt;/config.properties&#xd;
+Configure process-conf,xml in /workspace/&lt;Project Name&gt;/process-conf.xml&#xd;
+&#xd;
+For this process-conf,xml, the available process names are:&#xd;
+- exportAccount: to export your org&apos;s accounts&#xd;
+- importAccount: to import your org&apos;s accounts&#xd;
+&#xd;
+For this project to work, YOU MUST HAVE the dataloader jar accessible by your jenkins server (e.g. /var/jenkins_home/dataloader/dataloader-40.0.0-uber.jar). For instructions on how to download and compile the dataloader, as well as HOW TO WORK WITH AN ENCRYPTED PASSWORD, you can check the readme file here: https://github.com/54chi/DockerfileForce/&#xd;
+</description>
+  <keepDependencies>false</keepDependencies>
+  <properties>
+    <hudson.model.ParametersDefinitionProperty>
+      <parameterDefinitions>
+        <hudson.model.StringParameterDefinition>
+          <name>PROCESS_NAME</name>
+          <description></description>
+          <defaultValue>exportAccount</defaultValue>
+        </hudson.model.StringParameterDefinition>
+      </parameterDefinitions>
+    </hudson.model.ParametersDefinitionProperty>
+  </properties>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>java -cp /var/jenkins_home/dataloader/dataloader-40.0.0-uber.jar -Dsalesforce.config.dir=. com.salesforce.dataloader.process.ProcessRunner process.name=$PROCESS_NAME</command>
+    </hudson.tasks.Shell>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

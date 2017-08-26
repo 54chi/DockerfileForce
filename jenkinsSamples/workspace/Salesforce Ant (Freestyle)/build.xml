@@ -1,0 +1,27 @@
+<project name="SF-Jenkins" default="describeMetadata" xmlns:sf="antlib:com.salesforce">
+    <property file="build.properties"/>
+    <property environment="env"/>
+
+    <!-- Retrieves code -->
+    <target name="retrieveUnpackaged">
+      <mkdir dir="${sf.projectSource}" />
+      <sf:retrieve
+        username="${sf.username}"
+        password="${sf.password}"
+        serverurl="${sf.serverurl}"
+        retrieveTarget="${sf.projectSource}"
+        unpackaged="unpackaged.xml"
+        />
+    </target>
+
+    <!-- Deploys code -->
+    <target name="deployCode">
+      <sf:deploy
+        username="${sf.username}"
+        password="${sf.password}"
+        serverurl="${sf.serverurl}"
+        deployRoot="${sf.projectSource}">
+      </sf:deploy>
+    </target>
+
+</project>

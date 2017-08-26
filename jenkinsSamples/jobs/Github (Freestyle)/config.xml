@@ -7,7 +7,7 @@ Retrieve project from specified repo (specified under Source Code Management&apo
 The repo will be cloned into your jenkins&apos; /workspace/&lt;Project name&gt; folder (e.g. /workspace/Github (Freestyle))&#xd;
 &#xd;
 Once that&apos;s done, it will COMPARE for differences between the LAST_COMMIT and CURRENT_COMMIT and copy them into the &#xd;
-/workspace/diff/&lt;CURRENT_COMMIT&gt; folder, overwriting whatever content may be there.&#xd;
+/workspace/diff/&lt;BUILD_ID&gt;-&lt;CURRENT_COMMIT&gt; folder, overwriting whatever content may be there.&#xd;
 &#xd;
 * Note that if there is nothing to compare (e.g. the first time you run the project or if LAST_COMMIT is the same as CURRENT_COMMIT), the folder will be empty.&#xd;
 &#xd;
@@ -26,7 +26,7 @@ Other nifty tricks here:&#xd;
 `2&gt;/dev/null` will prevent error messages when copying (e.g &quot;cannot stat&quot;)&#xd;
 `exit 0` will always end in success, so it can continue even if the directory is empty&#xd;
 &#xd;
-&#xd;
+* The first time you execute this project, you may get an error because the $GIT_PREVIOUS_COMMIT is empty&#xd;
 * Additionally, consider using something like this: https://wiki.jenkins.io/display/JENKINS/Last+Changes+Plugin</description>
   <keepDependencies>false</keepDependencies>
   <properties>
@@ -85,11 +85,11 @@ Other nifty tricks here:&#xd;
       <command>echo &quot;BUILD ID: &quot; $BUILD_ID;
 echo &quot;PREVIOUS COMMIT:&quot; $LAST_COMMIT;
 echo &quot;GIT COMMIT: &quot; $CURRENT_COMMIT;
-rm -rf ../diffs/$CURRENT_COMMIT; mkdir ../diffs/$CURRENT_COMMIT
+rm -rf ../diffs/$BUILD_ID\-$CURRENT_COMMIT; mkdir ../diffs/$BUILD_ID\-$CURRENT_COMMIT
 </command>
     </hudson.tasks.Shell>
     <hudson.tasks.Shell>
-      <command>cp -av --parents `git log $LAST_COMMIT..$CURRENT_COMMIT --stat | grep -E &apos;\|&apos; | awk &apos;{print $1}&apos;` ../diffs/$CURRENT_COMMIT 2&gt;/dev/null || exit 0
+      <command>cp -av --parents `git log $LAST_COMMIT..$CURRENT_COMMIT --stat | grep -E &apos;\|&apos; | awk &apos;{print $1}&apos;` ../diffs/$BUILD_ID\-$CURRENT_COMMIT 2&gt;/dev/null || exit 0
 </command>
     </hudson.tasks.Shell>
   </builders>

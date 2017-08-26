@@ -1,0 +1,37 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<project>
+  <actions/>
+  <description>Bunch of goodies using the ant-salesforce jar&#xd;
+&#xd;
+Configure credentials in /workspace&lt;Project Name&gt;/build.properties&#xd;
+Configure build,xml in /workspace/&lt;Project Name&gt;/build.xml&#xd;
+package.xml is in /workspace/&lt;Project Name&gt;/unpackaged.xml&#xd;
+&#xd;
+For this build.xml, the available target(s) are:&#xd;
+- retrieveUnpackaged: Retrieve the code &#xd;
+- deployCode: Deploy to the SFDC instance.&#xd;
+&#xd;
+You can check the SalesForce migration guide (https://resources.docs.salesforce.com/sfdc/pdf/salesforce_migration_guide.pdf) for more information on commands and sample usage.&#xd;
+&#xd;
+</description>
+  <keepDependencies>false</keepDependencies>
+  <properties/>
+  <scm class="hudson.scm.NullSCM"/>
+  <canRoam>true</canRoam>
+  <disabled>false</disabled>
+  <blockBuildWhenDownstreamBuilding>false</blockBuildWhenDownstreamBuilding>
+  <blockBuildWhenUpstreamBuilding>false</blockBuildWhenUpstreamBuilding>
+  <triggers/>
+  <concurrentBuild>false</concurrentBuild>
+  <builders>
+    <hudson.tasks.Shell>
+      <command>set ANT_OPTS=-Xmx1g</command>
+    </hudson.tasks.Shell>
+    <hudson.tasks.Ant plugin="ant@1.5">
+      <targets>deployCode</targets>
+      <antName>(Default)</antName>
+    </hudson.tasks.Ant>
+  </builders>
+  <publishers/>
+  <buildWrappers/>
+</project>

@@ -1,0 +1,37 @@
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+  <bean id="exportAccount"
+    class="com.salesforce.dataloader.process.ProcessRunner"
+    singleton="false">
+		<description>Export Account Data</description>
+		<property name="name" value="exportAccount"/>
+		<property name="configOverrideMap">
+      <map>
+  			<entry key="sfdc.enableLastRunOutput" value="false"/>
+  			<entry key="sfdc.entity" value="Account"/>
+  			<entry key="process.operation" value="extract"/>
+  			<entry key="sfdc.extractionRequestSize" value="500"/>
+  			<entry key="sfdc.extractionSOQL" value="SELECT Id, Name FROM Account"/>
+  			<entry key="dataAccess.name" value="csvDataExport/account.csv"/>
+  			<entry key="dataAccess.type" value="csvWrite"/>
+  			<entry key="dataAccess.writeUTF8" value="true" />
+  		</map>
+		</property>
+	</bean>
+
+  <bean id="importAccount"
+    class="com.salesforce.dataloader.process.ProcessRunner"
+    singleton="false">
+    <description>Import Account Data</description>
+    <property name="name" value="importAccount"/>
+    <property name="configOverrideMap">
+      <map>
+        <entry key="sfdc.entity" value="Account"/>
+        <entry key="process.operation" value="upsert"/>
+        <entry key="process.mappingFile" value="csvDataImport/account.sdl"/>
+        <entry key="dataAccess.name" value="csvDataImport/account.csv" />
+        <entry key="dataAccess.type" value="csvRead" />
+      </map>
+    </property>
+  </bean>
+</beans>
