@@ -1,4 +1,4 @@
-FROM jenkins:alpine
+FROM jenkins/jenkins:lts-alpine
 MAINTAINER 54chi
 
 # based on anyei/jenkins-to-salesforce (last updated on 2015)
@@ -14,7 +14,7 @@ MAINTAINER 54chi
 # ENV PATH $PATH:/usr/lib/jvm/java-1.8-openjdk/jre/bin:/usr/lib/jvm/java-1.8-openjdk/bin
 
 ENV ANT_VERSION 1.10.1
-ENV MVN_VERSION=3.5.0
+ENV MVN_VERSION=3.5.3
 ENV SF_VERSION 40.0
 
 # Changing to root, it was running on jenkins user context
